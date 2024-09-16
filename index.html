@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Webcam Feed</title>
+    <title>Live Webcam Feed with Flip Camera</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300" rel="stylesheet">
     <style>
         body {
@@ -32,11 +32,16 @@
             object-fit: cover;
         }
 
-        #likeButton {
+        #controls {
             position: absolute;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
             background-color: #007bff;
             color: white;
             border: none;
@@ -47,7 +52,7 @@
             transition: background-color 0.3s;
         }
 
-        #likeButton:hover {
+        button:hover {
             background-color: #0056b3;
         }
 
@@ -68,24 +73,45 @@
 
     <div id="videoContainer">
         <video id="video" autoplay muted></video>
-        <button id="likeButton">👍 Like</button>
+        <div id="controls">
+            <button id="likeButton">👍 Like</button>
+            <button id="flipButton">Flip Camera</button>
+        </div>
         <div id="notification">You liked this video!</div>
     </div>
 
     <script>
         const likeButton = document.getElementById('likeButton');
+        const flipButton = document.getElementById('flipButton');
         const notification = document.getElementById('notification');
         const video = document.getElementById('video');
 
-        // Access the webcam
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => {
-                video.srcObject = stream; // Set the video source to the webcam stream
-            })
-            .catch(error => {
-                console.error('Error accessing webcam:', error);
-                alert('Could not access the webcam. Please allow camera access in your browser settings.');
-            });
+        let currentCamera = 'user'; // Start with the user camera (front)
+        const constraints = {
+            video: { facingMode: currentCamera }
+        };
+
+        // Function to start the video stream
+        function startVideoStream() {
+            navigator.mediaDevices.getUserMedia(constraints)
+                .then(stream => {
+                    video.srcObject = stream; // Set the video source to the webcam stream
+                })
+                .catch(error => {
+                    console.error('Error accessing webcam:', error);
+                    alert('Could not access the webcam. Please allow camera access in your browser settings.');
+                });
+        }
+
+        // Start the video stream on load
+        startVideoStream();
+
+        // Function to flip the camera
+        function flipCamera() {
+            currentCamera = (currentCamera === 'user') ? 'environment' : 'user'; // Toggle camera
+            constraints.video.facingMode = currentCamera; // Update constraints
+            startVideoStream(); // Restart the video stream
+        }
 
         likeButton.addEventListener('click', () => {
             notification.style.display = 'block';
@@ -99,6 +125,9 @@
                 }, 500); // Wait for fade-out effect to complete
             }, 2000);
         });
+
+        flipButton.addEventListener('click', flipCamera); // Add event listener to flip button
+
     </script>
 
 </body>
