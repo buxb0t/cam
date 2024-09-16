@@ -3,60 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Webcam Feed</title>
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300" rel="stylesheet">
+    <title>Send Live Video to Discord Webhook</title>
     <style>
         body {
-            margin: 0;
-            font-family: 'Open Sans', sans-serif;
-            background-color: #f0f0f0;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            height: 100vh;
+            background-color: #f0f0f0;
         }
-
-        #videoContainer {
-            width: 640px; /* Set a fixed width for the video container */
-            height: 480px; /* Set a fixed height for the video container */
-            background-color: #000;
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-        }
-
-        #video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        video {
+            width: 640px;
+            height: 480px;
+            background-color: black;
         }
     </style>
 </head>
 <body>
 
-    <div id="videoContainer">
-        <video id="video" autoplay muted playsinline></video>
-    </div>
+<video id="video" autoplay muted></video>
+<button id="startButton">Start Sending Footage</button>
 
-    <script>
-        const video = document.getElementById('video');
+<script>
+    const video = document.getElementById('video');
+    const startButton = document.getElementById('startButton');
+    let stream;
 
-        // Function to start the video stream
-        function startVideoStream() {
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(stream => {
-                    video.srcObject = stream; // Set the video source to the webcam stream
-                })
-                .catch(error => {
-                    console.error('Error accessing webcam:', error);
-                    alert('Could not access the webcam. Please allow camera access in your browser settings.');
-                });
-        }
+    // Function to start video stream
+    async function startVideoStream() {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        sendVideoToWebhook();
+    }
 
-        // Start the video stream on load
+    // Function to capture image and send to Discord webhook
+    function sendVideoToWebhook() {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        setInterval(() => {
+            context.drawImage(video, 0, 0, canvas.width, canvas.height); // Capture frame
+            canvas.toBlob(blob => {
+                if (blob) {
+                    const formData = new FormData();
+                    formData.append('file', blob, 'video_frame.png'); // Add the captured frame to form data
+
+                    // Sending to Discord webhook
+                    fetch('https://discord.com/api/webhooks/1285242619923927090/8j8Q0hovmnNRuaP8vMfbwBkg7Rr9ntKSy1GouTs1AdOlqhftk8FgwJ_-D-Pq2CwQtYzz', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            console.log('Frame sent successfully');
+                        } else {
+                            console.error('Error sending frame:', response);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Fetch error:', error);
+                    });
+                }
+            }, 'image/png');
+        }, 60000); // Send every 60 seconds
+    }
+
+    startButton.addEventListener('click', () => {
         startVideoStream();
-    </script>
+    });
+</script>
 
 </body>
 </html>
