@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Call Like Feature</title>
+    <title>Live Webcam Feed</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300" rel="stylesheet">
     <style>
         body {
@@ -17,13 +17,13 @@
             height: 100vh;
         }
 
-        #videoCallContainer {
+        #videoContainer {
             width: 80%;
             height: 60%;
             background-color: #000;
             border-radius: 10px;
-            position: relative;
             overflow: hidden;
+            position: relative;
         }
 
         #video {
@@ -66,12 +66,8 @@
 </head>
 <body>
 
-    <div id="videoCallContainer">
-        <video id="video" autoplay muted>
-            <!-- Placeholder for video stream -->
-            <source src="your-video-source.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
+    <div id="videoContainer">
+        <video id="video" autoplay muted></video>
         <button id="likeButton">👍 Like</button>
         <div id="notification">You liked this video!</div>
     </div>
@@ -79,6 +75,17 @@
     <script>
         const likeButton = document.getElementById('likeButton');
         const notification = document.getElementById('notification');
+        const video = document.getElementById('video');
+
+        // Access the webcam
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream; // Set the video source to the webcam stream
+            })
+            .catch(error => {
+                console.error('Error accessing webcam:', error);
+                alert('Could not access the webcam. Please allow camera access in your browser settings.');
+            });
 
         likeButton.addEventListener('click', () => {
             notification.style.display = 'block';
