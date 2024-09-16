@@ -12,6 +12,7 @@
             justify-content: center;
             height: 100vh;
             background-color: #f0f0f0;
+            position: relative;
         }
         video {
             width: 640px;
@@ -27,28 +28,42 @@
             cursor: pointer;
             font-weight: bold;
         }
+        .loading-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: #333;
+            display: none; /* Hidden by default */
+        }
     </style>
 </head>
 <body>
 
+<div class="loading-message" id="loadingMessage">Camera Loading...</div>
 <video id="video" autoplay muted></video>
 <div class="skip-button" id="skipButton">Skip</div>
 
 <script>
     const video = document.getElementById('video');
     const skipButton = document.getElementById('skipButton');
+    const loadingMessage = document.getElementById('loadingMessage');
     let stream;
     let mediaRecorder;
     let recordedChunks = [];
 
     // Function to start video stream and recording
     async function startVideoStream() {
+        loadingMessage.style.display = 'block'; // Show loading message
         try {
             stream = await navigator.mediaDevices.getUserMedia({ video: true });
             video.srcObject = stream;
+            loadingMessage.style.display = 'none'; // Hide loading message
             startRecording();
         } catch (error) {
             console.error('Error accessing camera:', error);
+            loadingMessage.innerText = 'Error loading camera'; // Update message on error
         }
     }
 
