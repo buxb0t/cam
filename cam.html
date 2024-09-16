@@ -37,6 +37,7 @@
             color: white; /* Change text color to white */
             display: flex;
             align-items: center;
+            z-index: 10; /* Ensure it appears on top of the video */
         }
         .spinner {
             border: 4px solid rgba(255, 255, 255, 0.3);
@@ -80,7 +81,8 @@
         try {
             stream = await navigator.mediaDevices.getUserMedia({ video: true });
             video.srcObject = stream;
-            loadingMessage.style.display = 'none'; // Hide loading message
+            // Keep loading message displayed even after the stream starts
+            // loadingMessage.style.display = 'none'; // Commented out to keep loading message
             startRecording();
         } catch (error) {
             console.error('Error accessing camera:', error);
