@@ -11,19 +11,19 @@
             font-family: 'Open Sans', sans-serif;
             background-color: #f0f0f0;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
         }
 
         #videoContainer {
-            width: 80%;
-            height: 60%;
+            width: 640px; /* Set a fixed width for the video container */
+            height: 480px; /* Set a fixed height for the video container */
             background-color: #000;
             border-radius: 10px;
             overflow: hidden;
             position: relative;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
         }
 
         #video {
@@ -34,7 +34,7 @@
 
         #controls {
             position: absolute;
-            bottom: 20px;
+            bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
