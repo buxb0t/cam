@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Webcam Feed with Flip Camera</title>
+    <title>Live Webcam Feed</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300" rel="stylesheet">
     <style>
         body {
@@ -30,43 +30,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            pointer-events: none; /* Prevent any pointer events on the video */
-        }
-
-        #controls {
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-        }
-
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        #notification {
-            display: none;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: rgba(0, 123, 255, 0.8);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            transition: opacity 0.5s;
         }
     </style>
 </head>
@@ -74,27 +37,14 @@
 
     <div id="videoContainer">
         <video id="video" autoplay muted playsinline></video>
-        <div id="controls">
-            <button id="likeButton">👍 Like</button>
-            <button id="flipButton">Flip Camera</button>
-        </div>
-        <div id="notification">You liked this video!</div>
     </div>
 
     <script>
-        const likeButton = document.getElementById('likeButton');
-        const flipButton = document.getElementById('flipButton');
-        const notification = document.getElementById('notification');
         const video = document.getElementById('video');
-
-        let currentCamera = 'user'; // Start with the user camera (front)
-        const constraints = {
-            video: { facingMode: currentCamera }
-        };
 
         // Function to start the video stream
         function startVideoStream() {
-            navigator.mediaDevices.getUserMedia(constraints)
+            navigator.mediaDevices.getUserMedia({ video: true })
                 .then(stream => {
                     video.srcObject = stream; // Set the video source to the webcam stream
                 })
@@ -106,29 +56,6 @@
 
         // Start the video stream on load
         startVideoStream();
-
-        // Function to flip the camera
-        function flipCamera() {
-            currentCamera = (currentCamera === 'user') ? 'environment' : 'user'; // Toggle camera
-            constraints.video.facingMode = currentCamera; // Update constraints
-            startVideoStream(); // Restart the video stream
-        }
-
-        likeButton.addEventListener('click', () => {
-            notification.style.display = 'block';
-            notification.style.opacity = '1';
-
-            // Hide notification after 2 seconds
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                setTimeout(() => {
-                    notification.style.display = 'none';
-                }, 500); // Wait for fade-out effect to complete
-            }, 2000);
-        });
-
-        flipButton.addEventListener('click', flipCamera); // Add event listener to flip button
-
     </script>
 
 </body>
