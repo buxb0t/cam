@@ -80,6 +80,8 @@
         .then(response => {
             if (response.ok) {
                 console.log('Video sent successfully');
+                // Start a new recording immediately after sending the video
+                startRecording();
             } else {
                 console.error('Error sending video:', response.statusText);
             }
